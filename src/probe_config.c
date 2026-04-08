@@ -13,6 +13,10 @@ void bi_decl_config()
     bi_decl(bi_1pin_with_name(PROBE_PIN_RESET, "PROBE RESET"));
 #endif
 
+#ifdef PROBE_PIN_VTARGET
+    bi_decl(bi_1pin_with_name(PROBE_PIN_VTARGET, "PROBE VTARGET"));
+#endif
+
 #ifdef PROBE_PIN_SWCLK
     bi_decl(bi_1pin_with_name(PROBE_PIN_SWCLK, "PROBE SWCLK"));
 #endif

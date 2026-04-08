@@ -481,6 +481,30 @@ __STATIC_FORCEINLINE void     PIN_nRESET_OUT (uint32_t bit) {
 #endif
 }
 
+// VTARGET Pin I/O------------------------------------------
+
+/** VTARGET I/O pin: Get Input.
+\return Current status of the VTARGET DAP hardware I/O pin.
+*/
+__STATIC_FORCEINLINE uint32_t PIN_VTARGET_IN  (void) {
+#ifdef PROBE_PIN_VTARGET
+  return probe_vtarget_level();
+#else
+  return (0U);
+#endif
+}
+
+/** VTARGET I/O pin: Set Output.
+\param bit target device hardware vtarget pin status:
+           - 0: disable the target power.
+           - 1: enable the target power.
+*/
+__STATIC_FORCEINLINE void     PIN_VTARGET_OUT (uint32_t bit) {
+#ifdef PROBE_PIN_VTARGET
+  probe_assert_vtarget(!!bit);
+#endif
+}
+
 ///@}
 
 

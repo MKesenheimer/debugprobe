@@ -74,8 +74,7 @@ void probe_set_swclk_freq(uint freq_khz) {
 void probe_assert_reset(bool state)
 {
 #if defined(PROBE_PIN_RESET)
-    /* Change the direction to out to drive pin to 0 or to in to emulate open drain */
-    gpio_set_dir(PROBE_PIN_RESET, state == 0 ? GPIO_OUT : GPIO_IN);
+    gpio_put(PROBE_PIN_RESET, state);
 #endif
 }
 
@@ -83,6 +82,24 @@ int probe_reset_level(void)
 {
 #if defined(PROBE_PIN_RESET)
     return gpio_get(PROBE_PIN_RESET);
+#else
+    return 0;
+#endif
+}
+
+void probe_assert_vtarget(bool state)
+{
+#if defined(PROBE_PIN_VTARGET)
+    // Pico Glitcher v2.2: vtarget is active low
+    gpio_put(PROBE_PIN_VTARGET, !state);
+    // TODO: implement check for other hardware versions
+#endif
+}
+
+int probe_vtarget_level(void)
+{
+#if defined(PROBE_PIN_VTARGET)
+    return gpio_get(PROBE_PIN_VTARGET);
 #else
     return 0;
 #endif
@@ -151,6 +168,10 @@ void probe_write_mode(void) {
 void probe_init() {
     if (!probe.initted) {
         probe_gpio_init();
+
+        // enable target power
+        probe_assert_vtarget(1);
+
         uint offset = pio_add_program(pio0, &probe_program);
         probe.offset = offset;
 
@@ -176,6 +197,7 @@ void probe_deinit(void)
     pio_remove_program(pio0, &probe_program, probe.offset);
 
     probe_assert_reset(1);	// de-assert nRESET
+    probe_assert_vtarget(0);// disable vtarget
     probe_gpio_deinit();
     probe.initted = 0;
   }

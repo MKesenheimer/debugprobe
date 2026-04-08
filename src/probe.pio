@@ -74,10 +74,20 @@ public read_cmd:
 static inline void probe_gpio_init()
 {
 #if defined(PROBE_PIN_RESET)
-    // Target reset pin: pull up, input to emulate open drain pin
-    gpio_pull_up(PROBE_PIN_RESET);
-    // gpio_init will leave the pin cleared and set as input
     gpio_init(PROBE_PIN_RESET);
+    gpio_set_dir(PROBE_PIN_RESET, GPIO_OUT);
+    // Reset pin: pull up
+    gpio_pull_up(PROBE_PIN_RESET);
+    gpio_put(PROBE_PIN_RESET, 1);
+#endif
+
+#if defined(PROBE_PIN_VTARGET)
+    gpio_init(PROBE_PIN_VTARGET);
+    gpio_set_dir(PROBE_PIN_VTARGET, GPIO_OUT);
+    // Target power pin: pull up
+    gpio_pull_up(PROBE_PIN_VTARGET);
+    // Pico Glitcher v2.2: vtarget is active low
+    gpio_put(PROBE_PIN_VTARGET, 1);
 #endif
     // Funcsel pins
     pio_gpio_init(pio0, PROBE_PIN_SWCLK);
@@ -92,6 +102,10 @@ static inline void probe_gpio_deinit()
 #if defined(PROBE_PIN_RESET)
 	gpio_deinit(PROBE_PIN_RESET);
 	gpio_disable_pulls(PROBE_PIN_RESET);
+#endif
+#if defined(PROBE_PIN_VTARGET)
+	gpio_deinit(PROBE_PIN_VTARGET);
+	gpio_disable_pulls(PROBE_PIN_VTARGET);
 #endif
 	gpio_deinit(PROBE_PIN_SWCLK);
 	gpio_disable_pulls(PROBE_PIN_SWCLK);
