@@ -61,6 +61,8 @@ uint8_t DAP_ReadTargetRegister(uint32_t addr, uint32_t *data) {
         return DAP_ERROR;
     }
 
+    //  AP: Access Port
+    //  DP: Debug Port
     // CSW: Control/Status Word
     // TAR: Transfer Address Register
     // DRW: Data Read/Write Register
@@ -100,12 +102,31 @@ static uint8_t TraceRip_DelayBusRead(uint32_t delay_us, uint32_t address, uint64
     *result = 0ULL;
     uint8_t status = DAP_OK;
     
+    // store swd state
+    // ?
+
+    // power off target
+    probe_assert_vtarget(0);
+
     // reset target
-    //RESET_TARGET();
+    probe_assert_reset(0);
+
+    // wait 100ms
+    uint64_t delay_cycles = 100000 * ((CPU_CLOCK/1000000U) + (DELAY_SLOW_CYCLES-1U)) / DELAY_SLOW_CYCLES;
+    PIN_DELAY_SLOW(delay_cycles);
+
+    // power on target
+    probe_assert_vtarget(1);
+
+    // configure debug block
+    // ?
+
+    // release reset
+    probe_assert_reset(1);
 
     // Precise delay using PIN_DELAY_SLOW
     // Convert microseconds to clock cycles based on current clock speed
-    uint64_t delay_cycles = delay_us * ((CPU_CLOCK/1000000U) + (DELAY_SLOW_CYCLES-1U)) / DELAY_SLOW_CYCLES;
+    delay_cycles = delay_us * ((CPU_CLOCK/1000000U) + (DELAY_SLOW_CYCLES-1U)) / DELAY_SLOW_CYCLES;
     if (delay_cycles > 0)
         PIN_DELAY_SLOW((uint32_t)delay_cycles);
     
