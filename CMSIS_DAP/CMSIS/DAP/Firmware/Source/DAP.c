@@ -74,13 +74,13 @@ static uint8_t DAP_Info(uint8_t id, uint8_t *info) {
 
   switch (id) {
     case DAP_ID_VENDOR:
-      length = DAP_GetVendorString((char *)info);
+      length = DAP_GetVendorString((char *)info); // -> does nothing
       break;
     case DAP_ID_PRODUCT:
-      length = DAP_GetProductString((char *)info);
+      length = DAP_GetProductString((char *)info); // -> does nothing
       break;
     case DAP_ID_SER_NUM:
-      length = DAP_GetSerNumString((char *)info);
+      length = DAP_GetSerNumString((char *)info); // -> does nothing
       break;
     case DAP_ID_FW_VER:
       length = (uint8_t)sizeof(DAP_FW_Ver);
@@ -147,6 +147,13 @@ static uint8_t DAP_Info(uint8_t id, uint8_t *info) {
 //    delay:  delay time in ms
 void Delayms(uint32_t delay) {
   delay *= ((CPU_CLOCK/1000U) + (DELAY_SLOW_CYCLES-1U)) / DELAY_SLOW_CYCLES;
+  PIN_DELAY_SLOW(delay);
+}
+
+// Delay for specified time
+//    delay:  delay time in us
+void Delayus(uint32_t delay) {
+  delay *= ((CPU_CLOCK/1000000U) + (DELAY_SLOW_CYCLES-1U)) / DELAY_SLOW_CYCLES;
   PIN_DELAY_SLOW(delay);
 }
 
@@ -1622,67 +1629,93 @@ uint32_t DAP_ProcessCommand(const uint8_t *request, uint8_t *response) {
   *response++ = *request;
 
   switch (*request++) {
+    /* Get probe info (not target info) */
     case ID_DAP_Info:
-      num = DAP_Info(*request, response+1);
+      num = DAP_Info(*request, response+1); 
       *response = (uint8_t)num;
       return ((2U << 16) + 2U + num);
 
+    /* set the status leds based on flags */
     case ID_DAP_HostStatus:
       num = DAP_HostStatus(request, response);
       break;
-
+    
+    /* initializes the GPIO pins and state machines (does not connect to the target) */
     case ID_DAP_Connect:
       num = DAP_Connect(request, response);
       break;
+
+    /* disables the GPIO pins and removes the state machines */
     case ID_DAP_Disconnect:
       num = DAP_Disconnect(response);
       break;
 
+    /* Process Delay command and prepare response */
     case ID_DAP_Delay:
       num = DAP_Delay(request, response);
       break;
 
+    /* Reset target */
     case ID_DAP_ResetTarget:
       num = DAP_ResetTarget(response);
       break;
 
+    /* sets and reads the outputs (TCK, TMS, TDI etc.) */
     case ID_DAP_SWJ_Pins:
       num = DAP_SWJ_Pins(request, response);
       break;
+
+    /* sets the clock speed */
     case ID_DAP_SWJ_Clock:
       num = DAP_SWJ_Clock(request, response);
       break;
+
+    /* sends a predefined swd sequence to reset or wake up the device */
     case ID_DAP_SWJ_Sequence:
       num = DAP_SWJ_Sequence(request, response);
       break;
 
+    /* sets the turnaround and dataphase parameters */
     case ID_DAP_SWD_Configure:
       num = DAP_SWD_Configure(request, response);
       break;
+    
+    /* output the predefined swd sequence */
     case ID_DAP_SWD_Sequence:
       num = DAP_SWD_Sequence(request, response);
       break;
 
+    /* */
     case ID_DAP_JTAG_Sequence:
       num = DAP_JTAG_Sequence(request, response);
       break;
+
+    /* */
     case ID_DAP_JTAG_Configure:
       num = DAP_JTAG_Configure(request, response);
       break;
+    
+    /* */
     case ID_DAP_JTAG_IDCODE:
       num = DAP_JTAG_IDCode(request, response);
       break;
 
+    /* sets the idle_cycles, retry_count, match_retry parameters */
     case ID_DAP_TransferConfigure:
       num = DAP_TransferConfigure(request, response);
       break;
+
+    /* Transfer data */
     case ID_DAP_Transfer:
       num = DAP_Transfer(request, response);
       break;
+
+    /* Transfer a block of data */
     case ID_DAP_TransferBlock:
       num = DAP_TransferBlock(request, response);
       break;
 
+    /* */
     case ID_DAP_WriteABORT:
       num = DAP_WriteAbort(request, response);
       break;

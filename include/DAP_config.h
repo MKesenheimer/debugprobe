@@ -63,7 +63,7 @@ This information includes:
 /// a Cortex-M0+ processor with high-speed peripheral I/O only 1 processor cycle might be
 /// required.
 #define IO_PORT_WRITE_CYCLES    1U              ///< I/O Cycles: 2=default, 1=Cortex-M0+ fast I/0.
-#define DELAY_SLOW_CYCLES 1U // We don't differentiate between fast/slow, we've got a 16-bit divisor for that
+#define DELAY_SLOW_CYCLES 3U // We don't differentiate between fast/slow, we've got a 16-bit divisor for that
 
 /// Indicate that Serial Wire Debug (SWD) communication mode is available at the Debug Access Port.
 /// This information is returned by the command \ref DAP_Info as part of <b>Capabilities</b>.

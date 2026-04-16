@@ -249,6 +249,7 @@ extern uint8_t  JTAG_Transfer   (uint32_t request, uint32_t *data);
 extern uint8_t  SWD_Transfer    (uint32_t request, uint32_t *data);
 
 extern void     Delayms         (uint32_t delay);
+extern void     Delayus         (uint32_t delay);
 
 extern uint32_t SWO_Transport      (const uint8_t *request, uint8_t *response);
 extern uint32_t SWO_Mode           (const uint8_t *request, uint8_t *response);
@@ -277,6 +278,7 @@ extern uint32_t Manchester_SWO_GetCount (void);
 extern uint32_t DAP_ProcessVendorCommand (const uint8_t *request, uint8_t *response);
 extern uint32_t DAP_ProcessCommand       (const uint8_t *request, uint8_t *response);
 extern uint32_t DAP_ExecuteCommand       (const uint8_t *request, uint8_t *response);
+//extern uint32_t DAP_SWJ_Sequence         (const uint8_t *request, uint8_t *response);
 
 extern void     DAP_Setup (void);
 
